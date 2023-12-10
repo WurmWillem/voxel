@@ -1,7 +1,7 @@
 use cgmath::{InnerSpace, Rotation3, Zero};
 use wgpu::{util::DeviceExt, Buffer, Device};
 
-pub const NUM_INSTANCES_PER_ROW: u32 = 10;
+pub const NUM_INSTANCES_PER_ROW: u32 = 1200;
 pub struct Instance {
     pub position: cgmath::Vector3<f32>,
     pub rotation: cgmath::Quaternion<f32>,
@@ -18,7 +18,8 @@ impl Instance {
     pub fn to_raw(&self) -> InstanceRaw {
         InstanceRaw {
             model: (cgmath::Matrix4::from_translation(self.position)
-                * cgmath::Matrix4::from(self.rotation))
+                * cgmath::Matrix4::from(self.rotation)
+                * cgmath::Matrix4::from_scale(0.5))
             .into(),
         }
     }
@@ -28,9 +29,9 @@ impl Instance {
             .flat_map(|z| {
                 (0..NUM_INSTANCES_PER_ROW).map(move |x| {
                     let position = cgmath::Vector3 {
-                        x: (x * 2) as f32, //x as f32
+                        x: (x * 1) as f32, //x as f32
                         y: 0.0,
-                        z: (z * 2) as f32,
+                        z: (z * 1) as f32,
                     };
 
                     let rotation = if position.is_zero() {
