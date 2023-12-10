@@ -168,15 +168,16 @@ impl Manager {
     pub fn create_render_pipeline(
         device: &Device,
         config: &SurfaceConfiguration,
-        texture_bind_group_layout: &wgpu::BindGroupLayout,
-        camera_bind_group_layout: &wgpu::BindGroupLayout,
+        tex_layout: &wgpu::BindGroupLayout,
+        cam_layout: &wgpu::BindGroupLayout,
+        count_layout: &wgpu::BindGroupLayout,
     ) -> RenderPipeline {
         let shader = device.create_shader_module(include_wgsl!("shader.wgsl"));
 
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[texture_bind_group_layout, camera_bind_group_layout],
+                bind_group_layouts: &[tex_layout, cam_layout, count_layout],
                 push_constant_ranges: &[],
             });
 

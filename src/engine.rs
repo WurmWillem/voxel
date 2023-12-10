@@ -26,6 +26,9 @@ pub struct Engine {
     instance_buffer: wgpu::Buffer,
     depth_texture: Texture,
     pub mouse_pressed: bool,
+    count: f32,
+    count_buffer: wgpu::Buffer,
+    count_bind_group: wgpu::BindGroup,
 }
 impl Engine {
     // Creating some of the wgpu types requires async code
@@ -76,6 +79,36 @@ impl Engine {
             label: Some("camera_bind_group"),
         });
 
+        let count_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Camera Buffer"),
+            contents: bytemuck::cast_slice(&[0.]),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+
+        let count_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                }],
+                label: Some("count_layout"),
+            });
+
+        let count_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &count_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: count_buffer.as_entire_binding(),
+            }],
+            label: Some("camera_bind_group"),
+        });
+
         let (instances, instance_buffer) = Instance::create_instances(&device);
 
         let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
@@ -85,6 +118,7 @@ impl Engine {
             &config,
             &texture_bind_group_layout,
             &camera_bind_group_layout,
+            &count_layout
         );
 
         let (vertex_buffer, index_buffer) = vertices::generate_buffers(&device);
@@ -115,6 +149,9 @@ impl Engine {
             instance_buffer,
             depth_texture,
             mouse_pressed: false,
+            count: 0.,
+            count_buffer,
+            count_bind_group,
         }
     }
 
@@ -174,6 +211,13 @@ impl Engine {
             0,
             bytemuck::cast_slice(&[self.cam_uniform]),
         );
+
+        self.count += 3.;
+        self.manager.queue.write_buffer(
+            &self.count_buffer,
+            0,
+            bytemuck::cast_slice(&[self.count]),
+        );
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
@@ -228,6 +272,7 @@ impl Engine {
             render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
 
             render_pass.set_bind_group(0, &self.block_bind_group, &[]);
+            render_pass.set_bind_group(2, &self.count_bind_group, &[]);
             // render_pass.draw_indexed(0..(self.num_indices - 6), 0, 0..self.instances.len() as _);
             render_pass.draw_indexed(0..self.num_indices, 0, 0..self.instances.len() as _);
 

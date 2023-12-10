@@ -1,7 +1,7 @@
 use cgmath::{InnerSpace, Rotation3, Zero};
 use wgpu::{util::DeviceExt, Buffer, Device};
 
-pub const NUM_INSTANCES_PER_ROW: u32 = 300;
+pub const NUM_INSTANCES_PER_ROW: u32 = 1400;
 pub struct Instance {
     pub pos: cgmath::Vector3<f32>,
     pub rot: cgmath::Quaternion<f32>,
