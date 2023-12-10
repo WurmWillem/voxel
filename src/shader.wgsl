@@ -19,6 +19,7 @@ struct InstanceInput {
 
 struct CameraUniform {
     view_proj: mat4x4<f32>,
+    count: f32,
 };
 @group(1) @binding(0)
 var<uniform> camera: CameraUniform; 
@@ -28,16 +29,20 @@ fn vs_main(
     model: VertexInput,
     instance: InstanceInput,
 ) -> VertexOutput {
-    let model_matrix = mat4x4<f32>(
+    var model_matrix = mat4x4<f32>(
         instance.model_matrix_0,
         instance.model_matrix_1,
         instance.model_matrix_2,
         instance.model_matrix_3,
     );
+    model_matrix.w.y = sin((model_matrix.w.x + camera.count) * 0.1) + sin(model_matrix.w.z * 0.1);
+    model_matrix.w.y *= camera.count;
 
     var out: VertexOutput;
     out.tex_coords = model.tex_coords;
-    out.clip_position = camera.view_proj * model_matrix  * vec4<f32>(model.position, 1.0);
+    var clip_pos = camera.view_proj * model_matrix  * vec4<f32>(model.position, 1.0);
+    // clip_pos.y = sin(clip_pos.x * 0.1);
+    out.clip_position = clip_pos;
     return out;
 }
 

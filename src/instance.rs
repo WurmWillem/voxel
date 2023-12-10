@@ -1,11 +1,10 @@
 use cgmath::{InnerSpace, Rotation3, Zero};
 use wgpu::{util::DeviceExt, Buffer, Device};
 
-pub const NUM_INSTANCES_PER_ROW: u32 = 100;
+pub const NUM_INSTANCES_PER_ROW: u32 = 300;
 pub struct Instance {
     pub pos: cgmath::Vector3<f32>,
     pub rot: cgmath::Quaternion<f32>,
-    pub d: f32,
 }
 
 #[repr(C)]
@@ -17,6 +16,12 @@ pub struct InstanceRaw {
 
 impl Instance {
     pub fn to_raw(&self) -> InstanceRaw {
+        /*println!(
+            "{:?}",
+            cgmath::Matrix4::from_translation(self.pos)
+                * cgmath::Matrix4::from(self.rot)
+                * cgmath::Matrix4::from_scale(0.5)
+        );*/
         InstanceRaw {
             model: (cgmath::Matrix4::from_translation(self.pos)
                 * cgmath::Matrix4::from(self.rot)
@@ -50,11 +55,7 @@ impl Instance {
                         cgmath::Quaternion::from_axis_angle(pos.normalize(), cgmath::Deg(0.0))
                     };
 
-                    Instance {
-                        pos,
-                        rot: rotation,
-                        d: 0.,
-                    }
+                    Instance { pos, rot: rotation }
                 })
             })
             .collect::<Vec<_>>();

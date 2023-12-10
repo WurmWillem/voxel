@@ -169,20 +169,6 @@ impl Engine {
         self.cam_uniform
             .update_view_proj(&self.camera, &self.projection);
 
-        let i = self
-            .instances
-            .iter_mut()
-            .map(|i| {
-                i.pos.y = (f32::sin(i.pos.x * 0.1 + i.d as f32) + f32::sin(i.pos.z * 0.1)) * 7.;
-                i.d += 0.05;
-
-                i.to_raw()
-            })
-            .collect::<Vec<_>>();
-        self.manager
-            .queue
-            .write_buffer(&self.instance_buffer, 0, bytemuck::cast_slice(&i));
-
         self.manager.queue.write_buffer(
             &self.camera_buffer,
             0,

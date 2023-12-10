@@ -628,21 +628,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hello_wgpu"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bytemuck",
- "cgmath",
- "env_logger",
- "image",
- "log",
- "pollster",
- "wgpu",
- "winit",
-]
-
-[[package]]
 name = "hermit-abi"
 version = "0.1.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1526,6 +1511,21 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+
+[[package]]
+name = "voxel_engine"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "cgmath",
+ "env_logger",
+ "image",
+ "log",
+ "pollster",
+ "wgpu",
+ "winit",
+]
 
 [[package]]
 name = "wasi"

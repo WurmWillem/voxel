@@ -205,6 +205,7 @@ pub struct CameraUniform {
     // to convert the Matrix4 into a 4x4 f32 array
     view_proj: [[f32; 4]; 4],
     view_position: [f32; 4],
+    count: f32,
 }
 
 impl CameraUniform {
@@ -212,11 +213,14 @@ impl CameraUniform {
         Self {
             view_position: [0.0; 4],
             view_proj: cgmath::Matrix4::identity().into(),
+            count: 0.,
         }
     }
 
     pub fn update_view_proj(&mut self, camera: &Camera, projection: &Projection) {
         // let copy = *self;
+        self.count += 100.;
+        println!("{}", self.count);
         self.view_position = camera.position.to_homogeneous().into();
         self.view_proj = (projection.calc_matrix() * camera.calc_matrix()).into();
     }
