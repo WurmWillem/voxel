@@ -22,7 +22,10 @@ use engine::Engine;
 pub async fn run() {
     env_logger::init();
     let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().with_maximized(true) .build(&event_loop).unwrap();
+    let window = WindowBuilder::new()
+        .with_maximized(true)
+        .build(&event_loop)
+        .unwrap();
 
     let mut state = Engine::new(&window).await;
     let mut last_render_time = std::time::Instant::now();

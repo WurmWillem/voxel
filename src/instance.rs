@@ -1,10 +1,11 @@
 use cgmath::{InnerSpace, Rotation3, Zero};
 use wgpu::{util::DeviceExt, Buffer, Device};
 
-pub const NUM_INSTANCES_PER_ROW: u32 = 1200;
+pub const NUM_INSTANCES_PER_ROW: u32 = 100;
 pub struct Instance {
-    pub position: cgmath::Vector3<f32>,
-    pub rotation: cgmath::Quaternion<f32>,
+    pub pos: cgmath::Vector3<f32>,
+    pub rot: cgmath::Quaternion<f32>,
+    pub d: f32,
 }
 
 #[repr(C)]
@@ -17,8 +18,8 @@ pub struct InstanceRaw {
 impl Instance {
     pub fn to_raw(&self) -> InstanceRaw {
         InstanceRaw {
-            model: (cgmath::Matrix4::from_translation(self.position)
-                * cgmath::Matrix4::from(self.rotation)
+            model: (cgmath::Matrix4::from_translation(self.pos)
+                * cgmath::Matrix4::from(self.rot)
                 * cgmath::Matrix4::from_scale(0.5))
             .into(),
         }
@@ -37,7 +38,6 @@ impl Instance {
                         z: (z * 1.) as f32,
                     };
                     pos.y *= 7.;
-                    
 
                     let rotation = if pos.is_zero() {
                         // this is needed so an object at (0, 0, 0) won't get scaled to zero
@@ -50,7 +50,11 @@ impl Instance {
                         cgmath::Quaternion::from_axis_angle(pos.normalize(), cgmath::Deg(0.0))
                     };
 
-                    Instance { position: pos, rotation }
+                    Instance {
+                        pos,
+                        rot: rotation,
+                        d: 0.,
+                    }
                 })
             })
             .collect::<Vec<_>>();
@@ -59,7 +63,7 @@ impl Instance {
         let instance_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Instance Buffer"),
             contents: bytemuck::cast_slice(&instance_data),
-            usage: wgpu::BufferUsages::VERTEX,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
         (instances, instance_buffer)
