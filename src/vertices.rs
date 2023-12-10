@@ -52,11 +52,11 @@ pub const VERTICES: &[Vertex] = &[
     },
     Vertex {
         position: [1.0, -1.0, 0.0],
-        tex_coords: [1.0, 1.0],
+        tex_coords: [0.5, 1.0],
     },
     Vertex {
         position: [1.0, 1.0, 0.0],
-        tex_coords: [1.0, 0.0],
+        tex_coords: [0.5, 0.0],
     },
     Vertex {
         position: [-1.0, 1.0, 0.0],
@@ -66,7 +66,7 @@ pub const VERTICES: &[Vertex] = &[
     //4, 5, 6, 7
     Vertex {
         position: [-1.0, -1.0, 2.0],
-        tex_coords: [1.0, 1.0],
+        tex_coords: [0.5, 1.0],
     },
     Vertex {
         position: [1.0, -1.0, 2.0],
@@ -78,17 +78,17 @@ pub const VERTICES: &[Vertex] = &[
     },
     Vertex {
         position: [-1.0, 1.0, 2.0],
-        tex_coords: [1.0, 0.0],
+        tex_coords: [0.5, 0.0],
     },
 
-    //8, 9, 10, 11, 
+    //8, 9, 10, 11, grass tex
     Vertex { 
         position: [1.0, 1.0, 0.0],  //front right
         tex_coords: [1.0, 1.0],
     },
     Vertex {
         position: [-1.0, 1.0, 0.0], //front left
-        tex_coords: [0.0, 1.0],
+        tex_coords: [0.5, 1.0],
     },
     Vertex {
         position: [1.0, 1.0, 2.0],  //back right
@@ -96,16 +96,18 @@ pub const VERTICES: &[Vertex] = &[
     },
     Vertex {
         position: [-1.0, 1.0, 2.0], //back left
-        tex_coords: [0.0, 0.0],
+        tex_coords: [0.5, 0.0],
     },
 ];
 #[rustfmt::skip]
 pub const INDICES: &[u16] = &[
     0, 1, 2, 2, 3, 0, 
     4, 5, 6, 6, 7, 4,
-    0, 3, 4, 3, 7, 4,
-    1, 2, 5, 5, 6, 2,
+    1, 2, 5, 6, 5, 2,
+    0, 3, 4, 3, 4, 7,
+
     8, 9, 10, 10, 11, 9
+    // 0, 1, 4, 4, 1, 5
     ];
 
 //pub const INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];

@@ -122,9 +122,8 @@ impl Texture {
 
     pub fn create_bind_groups(
         device: &wgpu::Device,
-        texture1: &Texture,
-        texture2: &Texture,
-    ) -> (BindGroup, BindGroup, BindGroupLayout) {
+        tex: &Texture,
+    ) -> (BindGroup, BindGroupLayout) {
         let texture_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 entries: &[
@@ -150,39 +149,23 @@ impl Texture {
                 label: Some("texture_bind_group_layout"),
             });
 
-        let texture1_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        let tex_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: &texture_bind_group_layout,
             entries: &[
                 wgpu::BindGroupEntry {
                     binding: 0,
-                    resource: wgpu::BindingResource::TextureView(&texture1.view),
+                    resource: wgpu::BindingResource::TextureView(&tex.view),
                 },
                 wgpu::BindGroupEntry {
                     binding: 1,
-                    resource: wgpu::BindingResource::Sampler(&texture1.sampler),
-                },
-            ],
-            label: Some("diffuse_bind_group"),
-        });
-
-        let texture2_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: &texture_bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(&texture2.view),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::Sampler(&texture2.sampler),
+                    resource: wgpu::BindingResource::Sampler(&tex.sampler),
                 },
             ],
             label: Some("diffuse_bind_group"),
         });
 
         (
-            texture1_bind_group,
-            texture2_bind_group,
+            tex_bind_group,
             texture_bind_group_layout,
         )
     }

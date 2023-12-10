@@ -16,7 +16,6 @@ pub struct Engine {
     index_buffer: wgpu::Buffer,
     num_indices: u32,
     block_bind_group: wgpu::BindGroup,
-    grass_bind_group: wgpu::BindGroup,
     camera: Camera,
     cam_uniform: CameraUniform,
     projection: Projection,
@@ -36,11 +35,8 @@ impl Engine {
         let block_bytes = include_bytes!("block.png");
         let block_texture = Texture::from_bytes(&device, &queue, block_bytes, "block png").unwrap();
 
-        let grass_bytes = include_bytes!("grass.png");
-        let grass_texture = Texture::from_bytes(&device, &queue, grass_bytes, "grass png").unwrap();
-
-        let (block_bind_group, grass_bind_group, texture_bind_group_layout) =
-            Texture::create_bind_groups(&device, &block_texture, &grass_texture);
+        let (block_bind_group, texture_bind_group_layout) =
+            Texture::create_bind_groups(&device, &block_texture);
 
         let camera = Camera::new((0.0, 5.0, 10.0), cgmath::Deg(-90.0), cgmath::Deg(-20.0));
         let projection =
@@ -110,7 +106,6 @@ impl Engine {
             index_buffer,
             num_indices,
             block_bind_group,
-            grass_bind_group,
             camera,
             camera_controller,
             camera_buffer,
@@ -232,15 +227,15 @@ impl Engine {
             render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
 
             render_pass.set_bind_group(0, &self.block_bind_group, &[]);
-            render_pass.draw_indexed(0..(self.num_indices - 6), 0, 0..self.instances.len() as _);
-            //render_pass.draw_indexed(0..self.num_indices, 0, 0..self.instances.len() as _);
+            // render_pass.draw_indexed(0..(self.num_indices - 6), 0, 0..self.instances.len() as _);
+            render_pass.draw_indexed(0..self.num_indices, 0, 0..self.instances.len() as _);
 
-            render_pass.set_bind_group(0, &self.grass_bind_group, &[]);
+            /*render_pass.set_bind_group(0, &self.grass_bind_group, &[]);
             render_pass.draw_indexed(
                 (self.num_indices - 6)..self.num_indices,
                 0,
                 0..self.instances.len() as _,
-            );
+            );*/
         }
         self.manager.queue.submit(std::iter::once(encoder.finish()));
         output.present();

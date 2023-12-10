@@ -14,6 +14,8 @@ pub const OPENGL_TO_WGPU_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
 
 const SAFE_FRAC_PI_2: f32 = FRAC_PI_2 - 0.0001;
 
+const CAM_SPEED: f32 = 20.;
+
 #[derive(Debug)]
 pub struct Camera {
     pub position: Point3<f32>,
@@ -106,7 +108,7 @@ impl CameraController {
 
     pub fn process_keyboard(&mut self, key: VirtualKeyCode, state: ElementState) -> bool {
         let amount = if state == ElementState::Pressed {
-            20.0
+            CAM_SPEED
         } else {
             0.0
         };

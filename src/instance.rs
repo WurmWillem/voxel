@@ -25,16 +25,21 @@ impl Instance {
     }
 
     pub fn create_instances(device: &Device) -> (Vec<Instance>, Buffer) {
+        // use f32::sin
         let instances = (0..NUM_INSTANCES_PER_ROW)
             .flat_map(|z| {
                 (0..NUM_INSTANCES_PER_ROW).map(move |x| {
-                    let position = cgmath::Vector3 {
-                        x: (x * 1) as f32, //x as f32
-                        y: 0.0,
-                        z: (z * 1) as f32,
+                    let x = x as f32;
+                    let z = z as f32;
+                    let mut pos = cgmath::Vector3 {
+                        x: (x * 1.) as f32, //x as f32
+                        y: f32::sin(x * 0.1) + f32::sin(z * 0.1),
+                        z: (z * 1.) as f32,
                     };
+                    pos.y *= 7.;
+                    
 
-                    let rotation = if position.is_zero() {
+                    let rotation = if pos.is_zero() {
                         // this is needed so an object at (0, 0, 0) won't get scaled to zero
                         // as Quaternions can effect scale if they're not created correctly
                         cgmath::Quaternion::from_axis_angle(
@@ -42,10 +47,10 @@ impl Instance {
                             cgmath::Deg(0.0),
                         )
                     } else {
-                        cgmath::Quaternion::from_axis_angle(position.normalize(), cgmath::Deg(0.0))
+                        cgmath::Quaternion::from_axis_angle(pos.normalize(), cgmath::Deg(0.0))
                     };
 
-                    Instance { position, rotation }
+                    Instance { position: pos, rotation }
                 })
             })
             .collect::<Vec<_>>();
