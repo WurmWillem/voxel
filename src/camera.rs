@@ -14,7 +14,7 @@ pub const OPENGL_TO_WGPU_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
 
 const SAFE_FRAC_PI_2: f32 = FRAC_PI_2 - 0.0001;
 
-const CAM_SPEED: f32 = 20.;
+const CAM_SPEED: f32 = 100.;
 
 #[derive(Debug)]
 pub struct Camera {
@@ -149,8 +149,8 @@ impl CameraController {
     pub fn process_scroll(&mut self, delta: &MouseScrollDelta) {
         self.scroll = -match delta {
             // I'm assuming a line is about 100 pixels
-            MouseScrollDelta::LineDelta(_, scroll) => scroll * 100.0,
-            MouseScrollDelta::PixelDelta(PhysicalPosition { y: scroll, .. }) => *scroll as f32,
+            MouseScrollDelta::LineDelta(_, scroll) => -scroll * 100.0 * CAM_SPEED,
+            MouseScrollDelta::PixelDelta(PhysicalPosition { y: scroll, .. }) => -*scroll as f32,
         };
     }
 
@@ -199,7 +199,7 @@ impl CameraController {
 
 #[repr(C)]
 // This is so we can store this in a buffer
-#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+#[derive(Debug, Copy, Clone, PartialEq, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct CameraUniform {
     // We can't use cgmath with bytemuck directly, so we'll have
     // to convert the Matrix4 into a 4x4 f32 array
@@ -216,6 +216,7 @@ impl CameraUniform {
     }
 
     pub fn update_view_proj(&mut self, camera: &Camera, projection: &Projection) {
+        // let copy = *self;
         self.view_position = camera.position.to_homogeneous().into();
         self.view_proj = (projection.calc_matrix() * camera.calc_matrix()).into();
     }

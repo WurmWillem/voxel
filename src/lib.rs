@@ -22,7 +22,10 @@ use engine::Engine;
 pub async fn run() {
     env_logger::init();
     let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().with_maximized(true) .build(&event_loop).unwrap();
+    let window = WindowBuilder::new()
+        .with_maximized(true)
+        .build(&event_loop)
+        .unwrap();
 
     let mut state = Engine::new(&window).await;
     let mut last_render_time = std::time::Instant::now();
@@ -127,10 +130,9 @@ impl Manager {
                     features: wgpu::Features::empty(),
                     // WebGL doesn't support all of wgpu's features, so if
                     // we're building for the web we'll have to disable some.
-                    limits: if cfg!(target_arch = "wasm32") {
-                        wgpu::Limits::downlevel_webgl2_defaults()
-                    } else {
-                        wgpu::Limits::default()
+                    limits: wgpu::Limits {
+                        max_buffer_size: 1000 * 1000 * 1000 * 1000,
+                        ..Default::default()
                     },
                     label: None,
                 },
@@ -165,15 +167,16 @@ impl Manager {
     pub fn create_render_pipeline(
         device: &Device,
         config: &SurfaceConfiguration,
-        texture_bind_group_layout: &wgpu::BindGroupLayout,
-        camera_bind_group_layout: &wgpu::BindGroupLayout,
+        tex_layout: &wgpu::BindGroupLayout,
+        cam_layout: &wgpu::BindGroupLayout,
+        count_layout: &wgpu::BindGroupLayout,
     ) -> RenderPipeline {
         let shader = device.create_shader_module(include_wgsl!("shader.wgsl"));
 
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[texture_bind_group_layout, camera_bind_group_layout],
+                bind_group_layouts: &[tex_layout, cam_layout, count_layout],
                 push_constant_ranges: &[],
             });
 

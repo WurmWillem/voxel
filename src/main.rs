@@ -1,4 +1,4 @@
-use hello_wgpu::run;
+use voxel_engine::run;
 
 fn main() {
     pollster::block_on(run());

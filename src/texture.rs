@@ -164,9 +164,6 @@ impl Texture {
             label: Some("diffuse_bind_group"),
         });
 
-        (
-            tex_bind_group,
-            texture_bind_group_layout,
-        )
+        (tex_bind_group, texture_bind_group_layout)
     }
 }

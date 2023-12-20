@@ -1,10 +1,10 @@
 use cgmath::{InnerSpace, Rotation3, Zero};
 use wgpu::{util::DeviceExt, Buffer, Device};
 
-pub const NUM_INSTANCES_PER_ROW: u32 = 1200;
+pub const NUM_INSTANCES_PER_ROW: u32 = 1000;
 pub struct Instance {
-    pub position: cgmath::Vector3<f32>,
-    pub rotation: cgmath::Quaternion<f32>,
+    pub pos: cgmath::Vector3<f32>,
+    pub rot: cgmath::Quaternion<f32>,
 }
 
 #[repr(C)]
@@ -16,9 +16,15 @@ pub struct InstanceRaw {
 
 impl Instance {
     pub fn to_raw(&self) -> InstanceRaw {
+        /*println!(
+            "{:?}",
+            cgmath::Matrix4::from_translation(self.pos)
+                * cgmath::Matrix4::from(self.rot)
+                * cgmath::Matrix4::from_scale(0.5)
+        );*/
         InstanceRaw {
-            model: (cgmath::Matrix4::from_translation(self.position)
-                * cgmath::Matrix4::from(self.rotation)
+            model: (cgmath::Matrix4::from_translation(self.pos)
+                * cgmath::Matrix4::from(self.rot)
                 * cgmath::Matrix4::from_scale(0.5))
             .into(),
         }
@@ -28,38 +34,41 @@ impl Instance {
         // use f32::sin
         let instances = (0..NUM_INSTANCES_PER_ROW)
             .flat_map(|z| {
-                (0..NUM_INSTANCES_PER_ROW).map(move |x| {
-                    let x = x as f32;
-                    let z = z as f32;
-                    let mut pos = cgmath::Vector3 {
-                        x: (x * 1.) as f32, //x as f32
-                        y: f32::sin(x * 0.1) + f32::sin(z * 0.1),
-                        z: (z * 1.) as f32,
-                    };
-                    pos.y *= 7.;
-                    
+                (0..5).flat_map(move |y_offset| {
+                    (0..NUM_INSTANCES_PER_ROW).map(move |x| {
+                        let x = x as f32;
+                        let z = z as f32;
+                        let mult = 0.1;
+                        let mut pos = cgmath::Vector3 {
+                            x, //x as f32
+                            y: f32::sin(x * mult) + f32::sin(z * mult),
+                            z,
+                        };
+                        pos.y = pos.y * 7. + y_offset as f32;
 
-                    let rotation = if pos.is_zero() {
-                        // this is needed so an object at (0, 0, 0) won't get scaled to zero
-                        // as Quaternions can effect scale if they're not created correctly
-                        cgmath::Quaternion::from_axis_angle(
-                            cgmath::Vector3::unit_z(),
-                            cgmath::Deg(0.0),
-                        )
-                    } else {
-                        cgmath::Quaternion::from_axis_angle(pos.normalize(), cgmath::Deg(0.0))
-                    };
+                        let rotation = if pos.is_zero() {
+                            // this is needed so an object at (0, 0, 0) won't get scaled to zero
+                            // as Quaternions can effect scale if they're not created correctly
+                            cgmath::Quaternion::from_axis_angle(
+                                cgmath::Vector3::unit_z(),
+                                cgmath::Deg(0.0),
+                            )
+                        } else {
+                            cgmath::Quaternion::from_axis_angle(pos.normalize(), cgmath::Deg(0.0))
+                        };
 
-                    Instance { position: pos, rotation }
+                        Instance { pos, rot: rotation }
+                    })
                 })
             })
             .collect::<Vec<_>>();
+        println!("{}", instances.len());
 
         let instance_data = instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
         let instance_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Instance Buffer"),
             contents: bytemuck::cast_slice(&instance_data),
-            usage: wgpu::BufferUsages::VERTEX,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
         (instances, instance_buffer)
