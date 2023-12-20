@@ -14,7 +14,7 @@ pub const OPENGL_TO_WGPU_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
 
 const SAFE_FRAC_PI_2: f32 = FRAC_PI_2 - 0.0001;
 
-const CAM_SPEED: f32 = 20.;
+const CAM_SPEED: f32 = 100.;
 
 #[derive(Debug)]
 pub struct Camera {

@@ -37,8 +37,11 @@ fn vs_main(
         instance.model_matrix_2,
         instance.model_matrix_3,
     );
-    model_matrix.w.y = sin((model_matrix.w.x + count) * 0.01) + sin(model_matrix.w.z * 0.01);
-    model_matrix.w.y *= 50.;
+    let s = 0.01;
+    let new_y = (sin((model_matrix.w.x + count) * s) + sin((model_matrix.w.z + count) * s * 0.543));
+    model_matrix.w.y += new_y * 30.;
+    
+    // model_matrix.w.y *= 50.;
 
     var out: VertexOutput;
     out.tex_coords = model.tex_coords;

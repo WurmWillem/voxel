@@ -85,20 +85,19 @@ impl Engine {
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
 
-        let count_layout =
-            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                entries: &[wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::VERTEX,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
-                }],
-                label: Some("count_layout"),
-            });
+        let count_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+            label: Some("count_layout"),
+        });
 
         let count_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: &count_layout,
@@ -118,7 +117,7 @@ impl Engine {
             &config,
             &texture_bind_group_layout,
             &camera_bind_group_layout,
-            &count_layout
+            &count_layout,
         );
 
         let (vertex_buffer, index_buffer) = vertices::generate_buffers(&device);
@@ -212,12 +211,10 @@ impl Engine {
             bytemuck::cast_slice(&[self.cam_uniform]),
         );
 
-        self.count += 3.;
-        self.manager.queue.write_buffer(
-            &self.count_buffer,
-            0,
-            bytemuck::cast_slice(&[self.count]),
-        );
+        self.count += 10.;
+        self.manager
+            .queue
+            .write_buffer(&self.count_buffer, 0, bytemuck::cast_slice(&[self.count]));
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
@@ -273,15 +270,7 @@ impl Engine {
 
             render_pass.set_bind_group(0, &self.block_bind_group, &[]);
             render_pass.set_bind_group(2, &self.count_bind_group, &[]);
-            // render_pass.draw_indexed(0..(self.num_indices - 6), 0, 0..self.instances.len() as _);
             render_pass.draw_indexed(0..self.num_indices, 0, 0..self.instances.len() as _);
-
-            /*render_pass.set_bind_group(0, &self.grass_bind_group, &[]);
-            render_pass.draw_indexed(
-                (self.num_indices - 6)..self.num_indices,
-                0,
-                0..self.instances.len() as _,
-            );*/
         }
         self.manager.queue.submit(std::iter::once(encoder.finish()));
         output.present();
