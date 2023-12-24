@@ -1,7 +1,7 @@
 use cgmath::{InnerSpace, Rotation3, Zero};
 use wgpu::{util::DeviceExt, Buffer, Device};
 
-pub const NUM_INSTANCES_PER_ROW: u32 = 1000;
+pub const INST_PER_ROW: usize = 1200;
 pub struct Instance {
     pub pos: cgmath::Vector3<f32>,
     pub rot: cgmath::Quaternion<f32>,
@@ -31,38 +31,42 @@ impl Instance {
     }
 
     pub fn create_instances(device: &Device) -> (Vec<Instance>, Buffer) {
-        // use f32::sin
-        let instances = (0..NUM_INSTANCES_PER_ROW)
-            .flat_map(|z| {
-                (0..5).flat_map(move |y_offset| {
-                    (0..NUM_INSTANCES_PER_ROW).map(move |x| {
-                        let x = x as f32;
-                        let z = z as f32;
-                        let mult = 0.1;
-                        let mut pos = cgmath::Vector3 {
-                            x, //x as f32
-                            y: f32::sin(x * mult) + f32::sin(z * mult),
-                            z,
-                        };
-                        pos.y = pos.y * 7. + y_offset as f32;
+        use noise::utils::{NoiseMapBuilder, PlaneMapBuilder};
+        use noise::{Fbm, Perlin};
+        let fbm = Fbm::<Perlin>::new(0);
 
-                        let rotation = if pos.is_zero() {
-                            // this is needed so an object at (0, 0, 0) won't get scaled to zero
-                            // as Quaternions can effect scale if they're not created correctly
-                            cgmath::Quaternion::from_axis_angle(
-                                cgmath::Vector3::unit_z(),
-                                cgmath::Deg(0.0),
-                            )
-                        } else {
-                            cgmath::Quaternion::from_axis_angle(pos.normalize(), cgmath::Deg(0.0))
-                        };
+        let p = PlaneMapBuilder::<_, 2>::new(&fbm)
+            .set_size(INST_PER_ROW, INST_PER_ROW)
+            .build();
 
-                        Instance { pos, rot: rotation }
-                    })
-                })
-            })
-            .collect::<Vec<_>>();
-        println!("{}", instances.len());
+        let mut instances = vec![];
+        for z in 0..INST_PER_ROW {
+            for y in 0..2 {
+                for x in 0..INST_PER_ROW {
+                    let v = p.get_value(x, z) + 1.006;
+              
+                    let mut pos = cgmath::Vector3 {
+                        x: x as f32,
+                        y: (v * 100.) as u32 as f32 + y as f32,
+                        z: z as f32,
+                    };
+                    // pos.y = pos.y * 40. + y as f32;
+
+                    let rotation = if pos.is_zero() {
+                        // this is needed so an object at (0, 0, 0) won't get scaled to zero
+                        // as Quaternions can effect scale if they're not created correctly
+                        cgmath::Quaternion::from_axis_angle(
+                            cgmath::Vector3::unit_z(),
+                            cgmath::Deg(0.0),
+                        )
+                    } else {
+                        cgmath::Quaternion::from_axis_angle(pos.normalize(), cgmath::Deg(0.0))
+                    };
+
+                    instances.push(Instance { pos, rot: rotation });
+                }
+            }
+        }
 
         let instance_data = instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
         let instance_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {

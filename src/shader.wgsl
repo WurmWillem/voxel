@@ -37,9 +37,11 @@ fn vs_main(
         instance.model_matrix_2,
         instance.model_matrix_3,
     );
-    let s = 0.01;
-    let new_y = (sin((model_matrix.w.x + count) * s) + sin((model_matrix.w.z + count) * s * 0.543));
-    model_matrix.w.y += new_y * 30.;
+    if count != 0. {
+        let s = 0.01;
+        let new_y = (sin((model_matrix.w.x + count) * s) + sin((model_matrix.w.z + count) * s * 0.543));
+        model_matrix.w.y += new_y * 3.;
+    }
     
     // model_matrix.w.y *= 50.;
 

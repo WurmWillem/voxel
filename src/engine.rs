@@ -35,7 +35,7 @@ impl Engine {
     pub async fn new(window: &Window) -> Self {
         let (surface, device, queue, config, size) = Manager::set_wgpu_up(window).await;
 
-        let block_bytes = include_bytes!("block.png");
+        let block_bytes = include_bytes!("b.png");
         let block_texture = Texture::from_bytes(&device, &queue, block_bytes, "block png").unwrap();
 
         let (block_bind_group, texture_bind_group_layout) =
@@ -211,7 +211,7 @@ impl Engine {
             bytemuck::cast_slice(&[self.cam_uniform]),
         );
 
-        self.count += 10.;
+        // self.count += 10.;
         self.manager
             .queue
             .write_buffer(&self.count_buffer, 0, bytemuck::cast_slice(&[self.count]));
