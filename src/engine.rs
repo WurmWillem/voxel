@@ -3,7 +3,7 @@ use crate::{
     instance::*,
     texture::Texture,
     vertices::{self, INDICES},
-    Manager,
+    Manager, WINDOW_SIZE,
 };
 use wgpu::util::DeviceExt;
 use winit::{event::*, window::Window};
@@ -41,7 +41,7 @@ impl Engine {
         let (block_bind_group, texture_bind_group_layout) =
             Texture::create_bind_groups(&device, &block_texture);
 
-        let camera = Camera::new((0.0, 5.0, 10.0), cgmath::Deg(-90.0), cgmath::Deg(-20.0));
+        let camera = Camera::new((0.0, 400.0, 10.0), cgmath::Deg(0.0), cgmath::Deg(-20.0));
         let projection =
             Projection::new(config.width, config.height, cgmath::Deg(45.0), 0.1, 100.0);
         let camera_controller = CameraController::new(4.0, 0.4);
@@ -253,13 +253,14 @@ impl Engine {
                     view: &self.depth_texture.view,
                     depth_ops: Some(wgpu::Operations {
                         load: wgpu::LoadOp::Clear(1.0),
-                        store: wgpu::StoreOp::Store,
+                        store: wgpu::StoreOp::Discard,
                     }),
                     stencil_ops: None,
                 }),
                 timestamp_writes: None,
                 occlusion_query_set: None,
             });
+            render_pass.set_scissor_rect(0, 0, WINDOW_SIZE.width, WINDOW_SIZE.height);
 
             render_pass.set_pipeline(&self.render_pipeline);
 

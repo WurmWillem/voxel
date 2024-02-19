@@ -19,11 +19,13 @@ mod vertices;
 
 use engine::Engine;
 
+pub const WINDOW_SIZE: PhysicalSize<u32> = PhysicalSize::new(1000, 1000);
+
 pub async fn run() {
     env_logger::init();
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
-        .with_maximized(true)
+        .with_inner_size(WINDOW_SIZE)
         .build(&event_loop)
         .unwrap();
 
@@ -217,11 +219,7 @@ impl Manager {
                 stencil: wgpu::StencilState::default(),
                 bias: wgpu::DepthBiasState::default(),
             }),
-            multisample: wgpu::MultisampleState {
-                count: 1,
-                mask: !0,
-                alpha_to_coverage_enabled: false,
-            },
+            multisample: wgpu::MultisampleState::default(),
             multiview: None, // 5.
         });
         render_pipeline

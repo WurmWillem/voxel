@@ -1,7 +1,7 @@
 use cgmath::{InnerSpace, Rotation3, Zero};
 use wgpu::{util::DeviceExt, Buffer, Device};
 
-pub const INST_PER_ROW: usize = 1200;
+pub const INST_PER_ROW: usize = 1414;
 pub struct Instance {
     pub pos: cgmath::Vector3<f32>,
     pub rot: cgmath::Quaternion<f32>,
@@ -41,7 +41,7 @@ impl Instance {
 
         let mut instances = vec![];
         for z in 0..INST_PER_ROW {
-            for y in 0..2 {
+            for y in 0..1 {
                 for x in 0..INST_PER_ROW {
                     let v = p.get_value(x, z) + 1.006;
               
